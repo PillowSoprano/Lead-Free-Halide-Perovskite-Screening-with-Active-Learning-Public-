@@ -32,7 +32,7 @@ warnings.filterwarnings("ignore")
 @dataclass
 class Config:
          
-    api_key: str = os.getenv('MATERIALS_PROJECT_API_KEY', '48rDBtyTQEbhQsFWFCVF4XUNHpuirNgD')
+    api_key: str = os.getenv('MATERIALS_PROJECT_API_KEY', '')
     
                     
     min_elements: int = 3
