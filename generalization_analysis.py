@@ -16,6 +16,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.patches import Rectangle
 
+plt.rcParams.update({'font.size': 16, 'axes.labelsize': 18, 'axes.titlesize': 18,
+                     'xtick.labelsize': 14, 'ytick.labelsize': 14, 'legend.fontsize': 14})
+
 warnings.filterwarnings("ignore")
 
 
@@ -441,60 +444,75 @@ class GeneralizationEvaluator:
         x_pos = np.arange(len(split_names))
         colors = ['#4E79A7', '#F28E2B', '#E15759', '#76B7B2']
 
-                     
+        # R² subplot
         ax = axes[0]
-        bars = ax.bar(x_pos, r2_means, yerr=r2_stds, capsize=5,
+        r2_plot = [max(v, -1.0) for v in r2_means]  # clip bars at -1 for display
+        r2_err_plot = [min(s, abs(v + 1.0)) if v < -1.0 else s
+                       for v, s in zip(r2_means, r2_stds)]
+        bars = ax.bar(x_pos, r2_plot, yerr=r2_err_plot, capsize=5,
                      color=colors[:len(split_names)],
                      edgecolor='black', linewidth=1.5, alpha=0.8)
         ax.set_xticks(x_pos)
-        ax.set_xticklabels(split_names, rotation=15, ha='right')
-        ax.set_ylabel('R² Score', fontsize=13, fontweight='bold')
+        ax.set_xticklabels(split_names, rotation=15, ha='right', fontsize=14)
+        ax.set_ylabel('R² Score', fontsize=18, fontweight='bold')
         ax.set_title('Model Performance: R²\n(Higher is Better)',
-                    fontsize=14, fontweight='bold')
+                    fontsize=18, fontweight='bold')
         ax.grid(True, alpha=0.3, axis='y')
-        ax.set_ylim(0, 1.0)
+        ax.set_ylim(-1.0, 1.0)
+        ax.axhline(0, color='black', linewidth=0.8, linestyle='-')
 
-                          
         for i, (bar, val, std) in enumerate(zip(bars, r2_means, r2_stds)):
-            height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height + std + 0.02,
-                   f'{val:.3f}', ha='center', va='bottom', fontsize=10)
+            display_y = max(val, -1.0)
+            if val < -1.0:
+                # annotate true value below the clipped bar
+                ax.text(bar.get_x() + bar.get_width()/2., -0.95,
+                       f'{val:.2f}*', ha='center', va='bottom',
+                       fontsize=12, color='red', fontweight='bold')
+            else:
+                ax.text(bar.get_x() + bar.get_width()/2.,
+                       display_y + min(std, 1.0 - display_y - 0.05) + 0.02,
+                       f'{val:.3f}', ha='center', va='bottom', fontsize=14)
+        ax.text(0.98, 0.02, '* clipped; true value shown',
+               transform=ax.transAxes, fontsize=12, ha='right',
+               va='bottom', color='red', style='italic')
 
-                       
+        # RMSE subplot
         ax = axes[1]
         bars = ax.bar(x_pos, rmse_means, yerr=rmse_stds, capsize=5,
                      color=colors[:len(split_names)],
                      edgecolor='black', linewidth=1.5, alpha=0.8)
         ax.set_xticks(x_pos)
-        ax.set_xticklabels(split_names, rotation=15, ha='right')
-        ax.set_ylabel('RMSE (eV)', fontsize=13, fontweight='bold')
+        ax.set_xticklabels(split_names, rotation=15, ha='right', fontsize=14)
+        ax.set_ylabel('RMSE (eV)', fontsize=18, fontweight='bold')
         ax.set_title('Model Performance: RMSE\n(Lower is Better)',
-                    fontsize=14, fontweight='bold')
+                    fontsize=18, fontweight='bold')
         ax.grid(True, alpha=0.3, axis='y')
+        rmse_max = max(v + s for v, s in zip(rmse_means, rmse_stds))
+        ax.set_ylim(0, min(rmse_max * 1.25, 1.5))
 
-                          
         for i, (bar, val, std) in enumerate(zip(bars, rmse_means, rmse_stds)):
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height + std + 0.01,
-                   f'{val:.3f}', ha='center', va='bottom', fontsize=10)
+                   f'{val:.3f}', ha='center', va='bottom', fontsize=14)
 
-                      
+        # MAE subplot
         ax = axes[2]
         bars = ax.bar(x_pos, mae_means, yerr=mae_stds, capsize=5,
                      color=colors[:len(split_names)],
                      edgecolor='black', linewidth=1.5, alpha=0.8)
         ax.set_xticks(x_pos)
-        ax.set_xticklabels(split_names, rotation=15, ha='right')
-        ax.set_ylabel('MAE (eV)', fontsize=13, fontweight='bold')
+        ax.set_xticklabels(split_names, rotation=15, ha='right', fontsize=14)
+        ax.set_ylabel('MAE (eV)', fontsize=18, fontweight='bold')
         ax.set_title('Model Performance: MAE\n(Lower is Better)',
-                    fontsize=14, fontweight='bold')
+                    fontsize=18, fontweight='bold')
         ax.grid(True, alpha=0.3, axis='y')
+        mae_max = max(v + s for v, s in zip(mae_means, mae_stds))
+        ax.set_ylim(0, min(mae_max * 1.25, 1.2))
 
-                          
         for i, (bar, val, std) in enumerate(zip(bars, mae_means, mae_stds)):
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height + std + 0.01,
-                   f'{val:.3f}', ha='center', va='bottom', fontsize=10)
+                   f'{val:.3f}', ha='center', va='bottom', fontsize=14)
 
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches='tight')

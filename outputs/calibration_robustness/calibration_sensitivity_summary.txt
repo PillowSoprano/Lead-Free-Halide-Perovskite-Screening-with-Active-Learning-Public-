@@ -1,0 +1,26 @@
+CALIBRATION SENSITIVITY ANALYSIS SUMMARY
+================================================================================
+
+1. LOOCV Analysis (n=15)
+----------------------------------------
+Slope:     0.8865 ± 0.0382
+Intercept: 0.9646 ± 0.0552
+MAE:       0.4397 eV
+RMSE:      0.5520 eV
+
+2. Bootstrap CI (B=10000, 95% CI)
+----------------------------------------
+Slope:     0.9010 [0.6320, 1.2476]
+Intercept: 0.9469 [0.4639, 1.4016]
+
+3. Candidate Set Sensitivity
+----------------------------------------
+Strategy  N_candidates  Heavy_d_count  Heavy_d_fraction
+      S0           130             24          0.184615
+      S1             2              0          0.000000
+      S2             2              0          0.000000
+
+Jaccard Overlaps:
+  S0 vs S1: 0.000
+  S0 vs S2: 0.000
+  S1 vs S2: 1.000

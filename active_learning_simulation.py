@@ -12,6 +12,9 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+plt.rcParams.update({'font.size': 16, 'axes.labelsize': 18, 'axes.titlesize': 18,
+                     'xtick.labelsize': 14, 'ytick.labelsize': 14, 'legend.fontsize': 14})
+
 warnings.filterwarnings("ignore")
 
 
@@ -432,11 +435,11 @@ class ActiveLearningSimulator:
             ax.fill_between(rounds, means - stds, means + stds,
                            alpha=0.2)
 
-        ax.set_xlabel('Active Learning Round', fontsize=13, fontweight='bold')
-        ax.set_ylabel('MAE on Test Set (eV)', fontsize=13, fontweight='bold')
+        ax.set_xlabel('Active Learning Round', fontsize=18, fontweight='bold')
+        ax.set_ylabel('MAE on Test Set (eV)', fontsize=18, fontweight='bold')
         ax.set_title('Learning Curves: Active Learning vs Random',
-                    fontsize=14, fontweight='bold')
-        ax.legend(fontsize=11, loc='upper right')
+                    fontsize=18, fontweight='bold')
+        ax.legend(fontsize=14, loc='upper right')
         ax.grid(True, alpha=0.3)
         ax.set_xticks(sorted(self.results['round'].unique()))
 
@@ -455,17 +458,17 @@ class ActiveLearningSimulator:
 
         ax.set_xticks(range(len(r1_summary)))
         ax.set_xticklabels(r1_summary.index, rotation=15, ha='right')
-        ax.set_ylabel('MAE on Test Set (eV)', fontsize=13, fontweight='bold')
+        ax.set_ylabel('MAE on Test Set (eV)', fontsize=18, fontweight='bold')
         ax.set_title(f'Round 1 Performance Comparison\n'
                     f'(n₀={self.config.n_initial}, K={self.config.k_per_round})',
-                    fontsize=14, fontweight='bold')
+                    fontsize=18, fontweight='bold')
         ax.grid(True, alpha=0.3, axis='y')
 
                           
         for i, (bar, val, std) in enumerate(zip(bars, r1_summary['mean'], r1_summary['std'])):
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height + std + 0.005,
-                   f'{val:.4f}', ha='center', va='bottom', fontsize=10)
+                   f'{val:.4f}', ha='center', va='bottom', fontsize=14)
 
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches='tight')

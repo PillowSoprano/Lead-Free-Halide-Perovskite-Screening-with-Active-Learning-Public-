@@ -2,6 +2,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 16, 'axes.labelsize': 18, 'axes.titlesize': 18,
+                     'xtick.labelsize': 14, 'ytick.labelsize': 14, 'legend.fontsize': 14})
 from scipy import stats
 from typing import Dict, Tuple, List
 import os
@@ -208,10 +210,10 @@ class MultiRoundALSimulator:
                                     
             ax.fill_between(x, y_mean - y_std, y_mean + y_std, alpha=0.2, color=color)
 
-        ax.set_xlabel('Labeled Set Size', fontsize=13)
-        ax.set_ylabel('Test MAE (eV)', fontsize=13)
-        ax.set_title('Multi-Round Active Learning Curves', fontsize=14, weight='bold')
-        ax.legend(loc='best', fontsize=11)
+        ax.set_xlabel('Labeled Set Size', fontsize=18)
+        ax.set_ylabel('Test MAE (eV)', fontsize=18)
+        ax.set_title('Multi-Round Active Learning Curves', fontsize=18, weight='bold')
+        ax.legend(loc='best', fontsize=14)
         ax.grid(alpha=0.3)
 
         plt.tight_layout()

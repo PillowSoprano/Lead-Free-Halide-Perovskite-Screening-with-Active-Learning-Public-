@@ -9,6 +9,9 @@ from scipy import interpolate
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+plt.rcParams.update({'font.size': 16, 'axes.labelsize': 18, 'axes.titlesize': 18,
+                     'xtick.labelsize': 14, 'ytick.labelsize': 14, 'legend.fontsize': 14})
+
 warnings.filterwarnings("ignore")
                                            
 
@@ -291,13 +294,20 @@ class UncertaintyCalibrator:
         return self.results
 
     def plot_calibration_diagnostics(self, save_path: str):
+        # Publication-quality font settings
+        import matplotlib
+        matplotlib.rcParams.update({
+            'font.size': 16, 'axes.titlesize': 18, 'axes.labelsize': 18,
+            'xtick.labelsize': 14, 'ytick.labelsize': 14,
+            'legend.fontsize': 14, 'figure.titlesize': 18,
+        })
         fig, axes = plt.subplots(2, 2, figsize=(16, 14))
 
                                                        
         ax = axes[0, 0]
 
                       
-        ax.scatter(self.sigma, self.errors, alpha=0.4, s=30,
+        ax.scatter(self.sigma, self.errors, alpha=0.4, s=80,
                   c='#4E79A7', edgecolors='none')
 
                         
@@ -318,12 +328,12 @@ class UncertaintyCalibrator:
         textstr += f"Pearson r = {corr['pearson_r']:.3f}"
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.8)
         ax.text(0.05, 0.95, textstr, transform=ax.transAxes,
-               fontsize=10, verticalalignment='top', bbox=props)
+               fontsize=14, verticalalignment='top', bbox=props)
 
-        ax.set_xlabel('Predicted Uncertainty (σ, eV)', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Absolute Error (eV)', fontsize=12, fontweight='bold')
-        ax.set_title('Error vs Uncertainty Correlation', fontsize=13, fontweight='bold')
-        ax.legend(fontsize=10)
+        ax.set_xlabel('Predicted Uncertainty (σ, eV)', fontsize=18, fontweight='bold')
+        ax.set_ylabel('Absolute Error (eV)', fontsize=18, fontweight='bold')
+        ax.set_title('(a) Error vs Uncertainty Correlation', fontsize=18, fontweight='bold')
+        ax.legend(fontsize=14)
         ax.grid(True, alpha=0.3)
 
                                             
@@ -347,13 +357,13 @@ class UncertaintyCalibrator:
         textstr += f"RMSCE = {calib['rmsce']:.4f} eV"
         props = dict(boxstyle='round', facecolor='lightblue', alpha=0.8)
         ax.text(0.05, 0.95, textstr, transform=ax.transAxes,
-               fontsize=10, verticalalignment='top', bbox=props)
+               fontsize=14, verticalalignment='top', bbox=props)
 
-        ax.set_xlabel('Mean Predicted σ in Bin (eV)', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Mean Absolute Error in Bin (eV)', fontsize=12, fontweight='bold')
-        ax.set_title(f'Calibration Curve ({calib["n_bins"]} bins)',
-                    fontsize=13, fontweight='bold')
-        ax.legend(fontsize=10)
+        ax.set_xlabel('Mean Predicted σ in Bin (eV)', fontsize=18, fontweight='bold')
+        ax.set_ylabel('Mean Absolute Error in Bin (eV)', fontsize=18, fontweight='bold')
+        ax.set_title(f'(b) Calibration Curve ({calib["n_bins"]} bins)',
+                    fontsize=18, fontweight='bold')
+        ax.legend(fontsize=14)
         ax.grid(True, alpha=0.3)
 
                                                
@@ -393,14 +403,14 @@ class UncertaintyCalibrator:
         for i, (exp, obs) in enumerate(zip(conf_levels * 100, observed_coverage * 100)):
             ax.annotate(f'{int(exp)}%',
                        xy=(exp, obs), xytext=(5, 5),
-                       textcoords='offset points', fontsize=9)
+                       textcoords='offset points', fontsize=14)
 
-        ax.set_xlabel('Expected Coverage (%)', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Observed Coverage (%)', fontsize=12, fontweight='bold')
-        ax.set_title('Prediction Interval Coverage', fontsize=13, fontweight='bold')
+        ax.set_xlabel('Expected Coverage (%)', fontsize=18, fontweight='bold')
+        ax.set_ylabel('Observed Coverage (%)', fontsize=18, fontweight='bold')
+        ax.set_title('(c) Prediction Interval Coverage', fontsize=18, fontweight='bold')
         ax.set_xlim(-5, 105)
         ax.set_ylim(-5, 105)
-        ax.legend(fontsize=10)
+        ax.legend(fontsize=14)
         ax.grid(True, alpha=0.3)
 
                                                             
@@ -428,12 +438,12 @@ class UncertaintyCalibrator:
         textstr += f"(Ideal: 0, 1)"
         props = dict(boxstyle='round', facecolor='lightyellow', alpha=0.8)
         ax.text(0.65, 0.95, textstr, transform=ax.transAxes,
-               fontsize=10, verticalalignment='top', bbox=props)
+               fontsize=14, verticalalignment='top', bbox=props)
 
-        ax.set_xlabel('Standardized Residuals (z-score)', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Density', fontsize=12, fontweight='bold')
-        ax.set_title('Residual Distribution Check', fontsize=13, fontweight='bold')
-        ax.legend(fontsize=10)
+        ax.set_xlabel('Standardized Residuals (z-score)', fontsize=18, fontweight='bold')
+        ax.set_ylabel('Density', fontsize=18, fontweight='bold')
+        ax.set_title('(d) Residual Distribution Check', fontsize=18, fontweight='bold')
+        ax.legend(fontsize=14)
         ax.grid(True, alpha=0.3, axis='y')
 
         plt.tight_layout()

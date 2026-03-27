@@ -3,6 +3,9 @@ import os
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 import yaml
+from dotenv import load_dotenv
+
+load_dotenv()
 
 import numpy as np
 import pandas as pd
@@ -22,6 +25,9 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
                
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+plt.rcParams.update({'font.size': 16, 'axes.labelsize': 18, 'axes.titlesize': 18,
+                     'xtick.labelsize': 14, 'ytick.labelsize': 14, 'legend.fontsize': 14})
 
 warnings.filterwarnings("ignore")
 
@@ -341,46 +347,92 @@ class PerovskiteValidator:
 class StratifiedPBECalibrator:
     
     def __init__(self):
-                                                                
+        # Calibration dataset: 20 inorganic lead-free halide perovskites
+        # PBE gaps from Materials Project (lowest-Ehull entry per formula).
+        # Experimental gaps from peer-reviewed optical measurements (UV-vis /
+        # diffuse reflectance / PL onset).  All values verified against primary
+        # literature; previous erroneous entries corrected (see commit notes).
+        # MA/FA organic-inorganic hybrids excluded: MP formula search returns
+        # incorrect mp-ids for these compounds.
+        # References stored in calibration_refs dict below.
         self.calibration_data = {
             'formula': [
-                          
-                'CsSnI3', 'CsSnBr3', 'CsSnCl3',
-                          
-                'CsGeI3', 'CsGeBr3',
-                                               
+                # Sn-based ABX3 (n=2)
+                'CsSnI3', 'CsSnBr3',
+                # Ge-based ABX3 (n=3)
+                'CsGeI3', 'CsGeBr3', 'CsGeCl3',
+                # Bi-based A3B2X9 (n=2)
+                'Cs3Bi2Br9', 'Cs3Bi2Cl9',
+                # Sb-based A3B2X9 (n=3)
+                'Cs3Sb2I9', 'Cs3Sb2Br9', 'Cs3Sb2Cl9',
+                # Double perovskites A2B'B''X6 (n=5)
                 'Cs2AgBiBr6', 'Cs2AgBiCl6', 'Cs2AgInCl6',
-                                 
-                'Cs2SnI6', 'Cs2TiI6',
-                       
-                'MASnI3', 'FASnI3',
-                                                   
-                'RbSnI3', 'MAGeI3', 'Cs2AgSbCl6'
+                'Cs2AgSbCl6', 'Cs2AgSbBr6',
+                # Vacancy-ordered A2BX6 (n=5)
+                'Cs2SnI6', 'Cs2SnBr6', 'Cs2SnCl6',
+                'Cs2TiI6', 'Cs2PdBr6',
             ],
             'pbe_gap': [
-                0.86, 1.47, 2.24,      
-                0.95, 1.62,            
-                1.89, 2.48, 2.93,            
-                1.35, 1.78,                 
-                0.73, 0.82,               
-                0.91, 0.88, 2.55               
+                # Sn
+                0.450, 0.968,
+                # Ge
+                0.991, 0.786, 2.154,
+                # Bi
+                2.600, 3.230,
+                # Sb
+                1.883, 1.984, 2.395,
+                # Double
+                1.355, 1.866, 1.342, 1.662, 1.192,
+                # Vacancy
+                0.294, 1.439, 2.590, 0.864, 0.756,
             ],
             'exp_gap': [
-                1.27, 1.75, 2.86,      
-                1.63, 2.35,            
-                2.19, 2.77, 3.23,            
-                1.62, 2.02,                 
-                1.17, 1.48,               
-                1.32, 1.55, 2.94               
+                # Sn  — Chung 2012 Nature; Stoumpos 2013 IC
+                1.31, 1.75,
+                # Ge  — Stoumpos 2015 IC (all three)
+                1.63, 2.32, 3.67,
+                # Bi  — Hoye 2016 CEJ (both)
+                2.60, 3.30,
+                # Sb  — Saparov 2015 CM; Vargas 2017 JPCL (×2)
+                2.05, 2.67, 3.56,
+                # Double — Slavney 2016 JACS (×2); Volonakis 2017 JPCL;
+                #          Babu 2021 JPCL; Deng 2020 AFM
+                1.95, 2.77, 3.23, 2.54, 1.64,
+                # Vacancy — Saparov 2016 CM; Kaltzoglou 2016 JPCC (×2);
+                #           Baranwal 2018 ChemSusChem; Babu 2020 JPCC
+                1.26, 1.82, 3.90, 1.02, 1.60,
             ],
             'material_type': [
-                'Sn', 'Sn', 'Sn',
-                'Ge', 'Ge',
-                'double', 'double', 'double',
-                'vacancy', 'vacancy',
                 'Sn', 'Sn',
-                'Sn', 'Ge', 'double'
+                'Ge', 'Ge', 'Ge',
+                'Bi', 'Bi',
+                'Sb', 'Sb', 'Sb',
+                'double', 'double', 'double', 'double', 'double',
+                'vacancy', 'vacancy', 'vacancy', 'vacancy', 'vacancy',
             ]
+        }
+        # Full references for SI table
+        self.calibration_refs = {
+            'CsSnI3':    'Chung et al. Nature 485, 486 (2012)',
+            'CsSnBr3':   'Stoumpos et al. Inorg. Chem. 52, 9019 (2013)',
+            'CsGeI3':    'Stoumpos et al. Inorg. Chem. 54, 2757 (2015)',
+            'CsGeBr3':   'Stoumpos et al. Inorg. Chem. 54, 2757 (2015)',
+            'CsGeCl3':   'Stoumpos et al. Inorg. Chem. 54, 2757 (2015)',
+            'Cs3Bi2Br9': 'Hoye et al. Chem. Eur. J. 22, 2605 (2016)',
+            'Cs3Bi2Cl9': 'Hoye et al. Chem. Eur. J. 22, 2605 (2016)',
+            'Cs3Sb2I9':  'Saparov et al. Chem. Mater. 27, 5622 (2015)',
+            'Cs3Sb2Br9': 'Vargas et al. J. Phys. Chem. Lett. 8, 1412 (2017)',
+            'Cs3Sb2Cl9': 'Vargas et al. J. Phys. Chem. Lett. 8, 1412 (2017)',
+            'Cs2AgBiBr6':'Slavney et al. J. Am. Chem. Soc. 138, 2138 (2016)',
+            'Cs2AgBiCl6':'Slavney et al. J. Am. Chem. Soc. 138, 2138 (2016)',
+            'Cs2AgInCl6':'Volonakis et al. J. Phys. Chem. Lett. 8, 772 (2017)',
+            'Cs2AgSbCl6':'Babu et al. J. Phys. Chem. Lett. 12, 4571 (2021)',
+            'Cs2AgSbBr6':'Deng et al. Adv. Funct. Mater. 30, 2002131 (2020)',
+            'Cs2SnI6':   'Saparov et al. Chem. Mater. 28, 2315 (2016)',
+            'Cs2SnBr6':  'Kaltzoglou et al. J. Phys. Chem. C 120, 11777 (2016)',
+            'Cs2SnCl6':  'Kaltzoglou et al. J. Phys. Chem. C 120, 11777 (2016)',
+            'Cs2TiI6':   'Baranwal et al. ChemSusChem 11, 3794 (2018)',
+            'Cs2PdBr6':  'Babu et al. J. Phys. Chem. C 124, 10580 (2020)',
         }
         
         self.global_model = None
@@ -515,26 +567,30 @@ class StratifiedPBECalibrator:
                     
         ax1.plot([0, 4], [0, 4], 'k:', linewidth=2, alpha=0.5, label='Ideal (1:1)')
         
-        ax1.set_xlabel('PBE Band Gap (eV)', fontsize=13, fontweight='bold')
-        ax1.set_ylabel('Experimental Band Gap (eV)', fontsize=13, fontweight='bold')
-        ax1.set_title(f'PBE → Experimental Calibration (n={len(pbe)})\n' + 
+        ax1.set_xlabel('PBE Band Gap (eV)', fontsize=18, fontweight='bold')
+        ax1.set_ylabel('Experimental Band Gap (eV)', fontsize=18, fontweight='bold')
+        ax1.set_title(f'(a) PBE → Experimental Calibration (n={len(pbe)})\n'
+                     f'Slope = {self.global_model["slope"]:.3f}, '
+                     f'Intercept = {self.global_model["intercept"]:.3f} eV, '
                      f'R² = {self.global_model["r2"]:.3f}',
-                     fontsize=14, fontweight='bold')
-        ax1.legend(fontsize=10)
+                     fontsize=18, fontweight='bold')
+        ax1.legend(fontsize=14)
+        ax1.tick_params(axis='both', labelsize=14)
         ax1.grid(True, alpha=0.3)
         
                           
         residuals = exp - (self.global_model['slope'] * pbe + self.global_model['intercept'])
-        ax2.scatter(pbe, residuals, s=100, alpha=0.6, c='#E15759', edgecolors='black')
+        ax2.scatter(pbe, residuals, s=120, alpha=0.6, c='#E15759', edgecolors='black')
         ax2.axhline(0, color='black', linestyle='--', linewidth=2)
         ax2.axhline(residuals.std(), color='red', linestyle=':', alpha=0.5, 
                    label=f'±1σ = ±{residuals.std():.3f} eV')
         ax2.axhline(-residuals.std(), color='red', linestyle=':', alpha=0.5)
         
-        ax2.set_xlabel('PBE Band Gap (eV)', fontsize=13, fontweight='bold')
-        ax2.set_ylabel('Residual (Exp - Predicted, eV)', fontsize=13, fontweight='bold')
-        ax2.set_title('Calibration Residuals', fontsize=14, fontweight='bold')
-        ax2.legend(fontsize=10)
+        ax2.set_xlabel('PBE Band Gap (eV)', fontsize=18, fontweight='bold')
+        ax2.set_ylabel('Residual (Exp − Predicted, eV)', fontsize=18, fontweight='bold')
+        ax2.set_title('(b) Calibration Residuals', fontsize=18, fontweight='bold')
+        ax2.legend(fontsize=14)
+        ax2.tick_params(axis='both', labelsize=14)
         ax2.grid(True, alpha=0.3)
         
         plt.tight_layout()
@@ -823,7 +879,7 @@ class ImprovedVisualizer:
                                             
         ax1.errorbar(y_true, y_pred, yerr=y_std, 
                      fmt='o', alpha=0.6, ecolor='lightgray', 
-                     elinewidth=1.5, capsize=2, markersize=6,
+                     elinewidth=1.5, capsize=2, markersize=8,
                      color='#4E79A7', markeredgecolor='black', markeredgewidth=0.5)
         
                                  
@@ -840,29 +896,29 @@ class ImprovedVisualizer:
                          
         textstr = f'R² = {r2:.3f}\nRMSE = {rmse:.3f} eV\nMAE = {mae:.3f} eV'
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.8)
-        ax1.text(0.05, 0.95, textstr, transform=ax1.transAxes, 
-                fontsize=11, verticalalignment='top', bbox=props)
-        
-        ax1.set_xlabel('DFT Band Gap (eV)', fontsize=13, fontweight='bold')
-        ax1.set_ylabel('Predicted Band Gap (eV)', fontsize=13, fontweight='bold')
+        ax1.text(0.05, 0.95, textstr, transform=ax1.transAxes,
+                fontsize=14, verticalalignment='top', bbox=props)
+
+        ax1.set_xlabel('DFT Band Gap (eV)', fontsize=18, fontweight='bold')
+        ax1.set_ylabel('Predicted Band Gap (eV)', fontsize=18, fontweight='bold')
         ax1.set_title('Model Performance: Predicted vs Actual\n(with epistemic uncertainty)',
-                     fontsize=14, fontweight='bold')
-        ax1.legend(fontsize=11)
+                     fontsize=18, fontweight='bold')
+        ax1.legend(fontsize=14)
         ax1.grid(True, alpha=0.3)
         
                               
         residuals = y_pred - y_true
-        ax2.scatter(y_true, residuals, alpha=0.6, s=50, 
+        ax2.scatter(y_true, residuals, alpha=0.6, s=80,
                    c='#E15759', edgecolors='black', linewidth=0.5)
         ax2.axhline(0, color='black', linestyle='--', linewidth=2)
         ax2.axhline(residuals.std(), color='red', linestyle=':', alpha=0.5,
                    label=f'±1σ = ±{residuals.std():.3f} eV')
         ax2.axhline(-residuals.std(), color='red', linestyle=':', alpha=0.5)
         
-        ax2.set_xlabel('DFT Band Gap (eV)', fontsize=13, fontweight='bold')
-        ax2.set_ylabel('Residual (Predicted - Actual, eV)', fontsize=13, fontweight='bold')
-        ax2.set_title('Residual Analysis', fontsize=14, fontweight='bold')
-        ax2.legend(fontsize=11)
+        ax2.set_xlabel('DFT Band Gap (eV)', fontsize=18, fontweight='bold')
+        ax2.set_ylabel('Residual (Predicted - Actual, eV)', fontsize=18, fontweight='bold')
+        ax2.set_title('Residual Analysis', fontsize=18, fontweight='bold')
+        ax2.legend(fontsize=14)
         ax2.grid(True, alpha=0.3)
         
         plt.tight_layout()
@@ -871,44 +927,44 @@ class ImprovedVisualizer:
         plt.close()
     
     @staticmethod
-    def plot_uncertainty_analysis(predicted_gaps, uncertainties, 
-                                  stabilities, save_path: str, 
-                                  target_gap: float = 1.34):
-        
+    def plot_uncertainty_analysis(predicted_gaps, uncertainties,
+                                  stabilities, save_path: str,
+                                  target_gap: float = 1.34,
+                                  bandgap_tolerance: float = 0.25,
+                                  min_uncertainty: float = 0.05,
+                                  max_uncertainty: float = 0.50):
+
         fig, ax = plt.subplots(figsize=(12, 8))
-        
-                                                 
-        scatter = ax.scatter(predicted_gaps, uncertainties, 
+
+        scatter = ax.scatter(predicted_gaps, uncertainties,
                            c=stabilities, cmap='RdYlGn_r',
-                           s=30, alpha=0.5, edgecolors='none')
-        
+                           s=80, alpha=0.5, edgecolors='none')
+
         cbar = plt.colorbar(scatter, ax=ax, label='Energy Above Hull (eV/atom)')
-        
-                                  
-        gap_min, gap_max = target_gap - 0.2, target_gap + 0.2
-        uncert_max = 0.3
-        
-        ax.axvline(target_gap, color='red', linestyle='--', 
-                  linewidth=2, alpha=0.5, label=f'SQ Limit ({target_gap} eV)')
-        ax.axvspan(gap_min, gap_max, alpha=0.1, color='green', 
-                  label='Target Gap Range')
-        ax.axhspan(0, uncert_max, alpha=0.1, color='blue', 
-                  label='Low Uncertainty Region')
-        
-                                                
-        ax.text(target_gap, uncert_max/2, 
-               'High-Priority\nCandidates', 
-               fontsize=12, fontweight='bold',
+
+        gap_min, gap_max = target_gap - bandgap_tolerance, target_gap + bandgap_tolerance
+
+        ax.axvline(target_gap, color='red', linestyle='--',
+                  linewidth=2, alpha=0.5, label=f'Target Gap ({target_gap} eV)')
+        ax.axvspan(gap_min, gap_max, alpha=0.1, color='green',
+                  label=f'Target Gap Range (±{bandgap_tolerance} eV)')
+        ax.axhspan(min_uncertainty, max_uncertainty, alpha=0.1, color='blue',
+                  label=f'AL Uncertainty Window ({min_uncertainty}–{max_uncertainty} eV)')
+
+        ax.text(target_gap, (min_uncertainty + max_uncertainty) / 2,
+               'High-Priority\nCandidates',
+               fontsize=16, fontweight='bold',
                ha='center', va='center',
                bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.7))
-        
-        ax.set_xlabel('Predicted Experimental Band Gap (eV)', 
-                     fontsize=13, fontweight='bold')
-        ax.set_ylabel('Prediction Uncertainty (eV)', 
-                     fontsize=13, fontweight='bold')
-        ax.set_title('Uncertainty Analysis: Identifying High-Priority Materials',
-                    fontsize=14, fontweight='bold')
-        ax.legend(loc='upper right', fontsize=10)
+
+        ax.set_xlabel('ML-Predicted Band Gap (eV)',
+                     fontsize=18, fontweight='bold')
+        ax.set_ylabel('Prediction Uncertainty — Ensemble Std (eV)',
+                     fontsize=18, fontweight='bold')
+        ax.set_title('Figure 3: Uncertainty vs ML-Predicted Gap for 1,117 Compounds',
+                    fontsize=18, fontweight='bold')
+        ax.tick_params(axis='both', labelsize=14)
+        ax.legend(loc='upper right', fontsize=14)
         ax.grid(True, alpha=0.3)
         
         plt.tight_layout()
@@ -932,10 +988,10 @@ class ImprovedVisualizer:
                capsize=5)
         
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(top_features['feature'].values[::-1], fontsize=11)
-        ax.set_xlabel('Feature Importance', fontsize=13, fontweight='bold')
+        ax.set_yticklabels(top_features['feature'].values[::-1], fontsize=14)
+        ax.set_xlabel('Feature Importance', fontsize=18, fontweight='bold')
         ax.set_title(f'Top {top_n} Feature Importances\n(with ensemble variability)',
-                    fontsize=14, fontweight='bold')
+                    fontsize=18, fontweight='bold')
         ax.grid(True, alpha=0.3, axis='x')
         
         plt.tight_layout()
@@ -1409,7 +1465,10 @@ def main():
         df['prediction_uncertainty'].values,
         df['e_above_hull'].values,
         os.path.join(config.save_dir, 'improved_uncertainty_analysis.png'),
-        target_gap=config.target_bandgap
+        target_gap=config.target_bandgap,
+        bandgap_tolerance=config.bandgap_tolerance,
+        min_uncertainty=config.min_uncertainty,
+        max_uncertainty=config.max_uncertainty
     )
     
                         

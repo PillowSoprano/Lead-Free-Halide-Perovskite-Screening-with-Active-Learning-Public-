@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 16, 'axes.labelsize': 18, 'axes.titlesize': 18,
+                     'xtick.labelsize': 14, 'ytick.labelsize': 14, 'legend.fontsize': 14})
 from pymatgen.core import Composition, Element
 from typing import Dict, List, Tuple
 import os
@@ -198,8 +200,8 @@ class ProxyFeatureAblation:
 
         bars = ax.bar(categories, fractions, color=['steelblue', 'coral'],
                       edgecolor='black', alpha=0.8)
-        ax.set_ylabel('Heavy d Fraction', fontsize=12)
-        ax.set_title('(a) Heavy d False Positive Rate', fontsize=13, weight='bold')
+        ax.set_ylabel('Heavy d Fraction', fontsize=18)
+        ax.set_title('(a) Heavy d False Positive Rate', fontsize=18, weight='bold')
         ax.set_ylim(0, max(fractions) * 1.2)
         ax.grid(axis='y', alpha=0.3)
 
@@ -208,7 +210,7 @@ class ProxyFeatureAblation:
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height,
                    f'{frac:.2%}',
-                   ha='center', va='bottom', fontsize=11, weight='bold')
+                   ha='center', va='bottom', fontsize=14, weight='bold')
 
                                            
         ax = axes[1]
@@ -229,9 +231,9 @@ class ProxyFeatureAblation:
         ax.hist(sigma_proxy_heavy, bins=bins, alpha=0.6, label='+Proxy',
                color='coral', edgecolor='black')
 
-        ax.set_xlabel('Uncertainty (eV)', fontsize=12)
-        ax.set_ylabel('Count (Heavy d candidates)', fontsize=12)
-        ax.set_title('(b) Uncertainty Distribution for Heavy d Materials', fontsize=13, weight='bold')
+        ax.set_xlabel('Uncertainty (eV)', fontsize=18)
+        ax.set_ylabel('Count (Heavy d candidates)', fontsize=18)
+        ax.set_title('(b) Uncertainty Distribution for Heavy d Materials', fontsize=18, weight='bold')
         ax.legend()
         ax.grid(alpha=0.3)
 

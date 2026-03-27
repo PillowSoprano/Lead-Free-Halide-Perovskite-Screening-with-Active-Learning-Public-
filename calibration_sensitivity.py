@@ -2,6 +2,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 16, 'axes.labelsize': 18, 'axes.titlesize': 18,
+                     'xtick.labelsize': 14, 'ytick.labelsize': 14, 'legend.fontsize': 14})
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from typing import Dict, Tuple, List
@@ -92,44 +94,44 @@ class CalibrationSensitivityAnalyzer:
         ax.hist(loocv_results['slopes'], bins=10, edgecolor='black', alpha=0.7)
         ax.axvline(loocv_results['slope_mean'], color='red', linestyle='--',
                    label=f"Mean: {loocv_results['slope_mean']:.3f}")
-        ax.set_xlabel('Slope (LOOCV)', fontsize=12)
-        ax.set_ylabel('Frequency', fontsize=12)
-        ax.set_title('(a) LOOCV Slope Distribution', fontsize=13, weight='bold')
+        ax.set_xlabel('Slope (LOOCV)', fontsize=18)
+        ax.set_ylabel('Frequency', fontsize=18)
+        ax.set_title('(a) LOOCV Slope Distribution', fontsize=18, weight='bold')
         ax.legend()
         ax.grid(alpha=0.3)
 
-                         
+
         ax = axes[0, 1]
         ax.hist(loocv_results['intercepts'], bins=10, edgecolor='black', alpha=0.7)
         ax.axvline(loocv_results['intercept_mean'], color='red', linestyle='--',
                    label=f"Mean: {loocv_results['intercept_mean']:.3f}")
-        ax.set_xlabel('Intercept (LOOCV)', fontsize=12)
-        ax.set_ylabel('Frequency', fontsize=12)
-        ax.set_title('(b) LOOCV Intercept Distribution', fontsize=13, weight='bold')
+        ax.set_xlabel('Intercept (LOOCV)', fontsize=18)
+        ax.set_ylabel('Frequency', fontsize=18)
+        ax.set_title('(b) LOOCV Intercept Distribution', fontsize=18, weight='bold')
         ax.legend()
         ax.grid(alpha=0.3)
 
-                         
+
         ax = axes[1, 0]
         ax.hist(bootstrap_results['slopes'], bins=50, edgecolor='black', alpha=0.7)
         ax.axvline(bootstrap_results['slope_ci'][0], color='red', linestyle='--',
                    label=f"95% CI: [{bootstrap_results['slope_ci'][0]:.3f}, {bootstrap_results['slope_ci'][1]:.3f}]")
         ax.axvline(bootstrap_results['slope_ci'][1], color='red', linestyle='--')
-        ax.set_xlabel('Slope (Bootstrap)', fontsize=12)
-        ax.set_ylabel('Frequency', fontsize=12)
-        ax.set_title('(c) Bootstrap Slope Distribution', fontsize=13, weight='bold')
+        ax.set_xlabel('Slope (Bootstrap)', fontsize=18)
+        ax.set_ylabel('Frequency', fontsize=18)
+        ax.set_title('(c) Bootstrap Slope Distribution', fontsize=18, weight='bold')
         ax.legend()
         ax.grid(alpha=0.3)
 
-                             
+
         ax = axes[1, 1]
         ax.hist(bootstrap_results['intercepts'], bins=50, edgecolor='black', alpha=0.7)
         ax.axvline(bootstrap_results['intercept_ci'][0], color='red', linestyle='--',
                    label=f"95% CI: [{bootstrap_results['intercept_ci'][0]:.3f}, {bootstrap_results['intercept_ci'][1]:.3f}]")
         ax.axvline(bootstrap_results['intercept_ci'][1], color='red', linestyle='--')
-        ax.set_xlabel('Intercept (Bootstrap)', fontsize=12)
-        ax.set_ylabel('Frequency', fontsize=12)
-        ax.set_title('(d) Bootstrap Intercept Distribution', fontsize=13, weight='bold')
+        ax.set_xlabel('Intercept (Bootstrap)', fontsize=18)
+        ax.set_ylabel('Frequency', fontsize=18)
+        ax.set_title('(d) Bootstrap Intercept Distribution', fontsize=18, weight='bold')
         ax.legend()
         ax.grid(alpha=0.3)
 
