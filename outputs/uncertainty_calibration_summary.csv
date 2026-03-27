@@ -1,6 +1,0 @@
-Metric,Value,Interpretation
-Spearman ρ,0.4182,Weak positive - Uncertainty has limited value
-ECE,0.2852 eV,Poor calibration - σ does not match true error
-95% Coverage,0.478,"Expected: 0.950, Miscal: 0.472"
-NLL,3.8066,Poor - High NLL indicates bad calibration
-CRPS,0.4001 eV,Moderate predictive performance

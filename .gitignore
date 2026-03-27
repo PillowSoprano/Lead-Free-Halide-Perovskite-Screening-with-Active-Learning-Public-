@@ -27,3 +27,4 @@ Thumbs.db
 
 # Temporary fix scripts (not part of reproducible pipeline)
 fix_*.py
+outputs/
